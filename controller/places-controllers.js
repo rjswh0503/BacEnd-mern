@@ -5,7 +5,7 @@ const { validationResult } = require('express-validator');
 
 const HttpError = require('../models/http-error');
 const getCoordsForAddress = require('../util/location');
-
+const Place = require('../models/place');
 
 let DUMMY_PLACES = [
     {
@@ -83,17 +83,25 @@ const createPlace =  async (req, res, next) => {
     
      
     // const title = req.body.title 과 같음..
-    const createPlace = {
-        id: uuidv4(),
+    const createPlace = new Place({
         title,
         description,
-        location : coordinates,
         address,
+        location: coordinates,
+        image: 'https://i.namu.wiki/i/UdlHN4NBO9ma2-9zq4o1LOlNbzEcN14BprHeMxd1dZmp-C8j-7XKzrJiN0MEcl38bKlVDemPU7OjABFBNuCXlh4UTDnAZu_Qw8zWcx6TBc3zyXzr7V6rH4RXe_sR0TWYIJZqYa_L7BvrUq1EtMc2gOg--_6bllND_s5kcZ98fX8.webp',
         creator
-    };
-    // DUMMY_PLACES에 createPlace데이터를 push 집어 넣어준다 . 
-    DUMMY_PLACES.push(createPlace); // 
+    });
 
+    //save() 도 프로미스이다. 비동기식 작업 
+    try {
+        await createPlace.save();
+    } catch( err ){
+        const error = new HttpError(
+            '장소 생성에 실패했습니다. 다시 시도하세요.', 500
+        );
+        return next(error);
+    }
+    
     // 보통 새롭게 등록된 것이 있을 때 201번을 반환 
     res.status(201).json({place: createPlace})
 }

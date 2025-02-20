@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 
 // router 미들웨어가 되어 편하게 사용 가능
 const placesRoutes = require('./routes/places-routes');
@@ -33,7 +34,12 @@ app.use((error, req, res, next) => {
     res.json({Message: error.Message || '알 수 없는 애러가 발생했습니다.!!'});
 });
 
-
-app.listen(5000, (req,res) => {
-    console.log('서버 실행중....')
+mongoose.connect('mongodb+srv://shin:153123@cluster0.ydxf4.mongodb.net/places?retryWrites=true&w=majority&appName=Cluster0')
+.then(() => {
+    app.listen(5000, (req,res) => {
+        console.log('서버 실행중....')
+    });
+})
+.catch((err) => {
+    console.log(err);
 });

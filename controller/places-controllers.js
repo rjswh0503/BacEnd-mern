@@ -22,19 +22,30 @@ let DUMMY_PLACES = [
     }
 ]
 
-const getPlacesById  = (req,res,next) => {
-    const placesId = req.params.pid // { pId : 'p1'}
+const getPlacesById  = async (req,res,next) => {
+    const placeId = req.params.pid // { pId : 'p1'}
 
-    const place = DUMMY_PLACES.find(p => {
-        return p.id === placesId
-    });
+    let place;
+
+    try {
+         place =  await Place.findById(placeId);
+
+    } catch(err){
+        const error = new HttpError(
+            '오류가 발생했습니다. 장소를 찾을 수 없습니다.', 500
+        );
+        //error가 발생하면 정지 시켜줌 
+        return next(error);
+    }
+    
 
    if(!place){              // constructor(message,            errorCode);
-    throw new HttpError('해당 ID값에 대한 장소를 찾지 못했습니다.', 404);
-    
+    const error =  new HttpError('해당 ID값에 대한 장소를 찾지 못했습니다.', 404);
+     
+    return next(error);
     // thorw를 할 때는 return을 쓰지 않아도 되지만, next(error)를 사용할 경우에는 앞에 return을 꼭 사용
    };
-    res.json({ place })
+    res.json({ place : place.toObject( {getters: true }) });
     
 };
 
@@ -47,19 +58,23 @@ const getPlacesById  = (req,res,next) => {
 
 
 
-const getPlacesByUserId = (req,res, next) => {
+const getPlacesByUserId = async (req,res, next) => {
     const userId = req.params.uid;
 
-    const places = DUMMY_PLACES.filter(p => {
-        return p.creator === userId
-    });
+    let places;
+    try {
+        places = await Place.find({ creator : userId });
+    } catch(err) {
+        const error = new HttpError('오류가 발생했습니다. 유저를 찾을 수 없습니다.', 500);
+        return next(error);
+    };
     
     if(!places || places.length === 0 ){
        return next(
-       new HttpError('제공된 사용자 ID와 일치하는 장소를 찾을 수 없습니다.', 404)
+       new HttpError('사용자 ID와 일치하는 장소를 찾을 수 없습니다.', 404)
     );
     };
-    res.json({ places })
+    res.json({ places : places.map(place => place.toObject( { getters: true } ) )})
 };
 
 
@@ -106,7 +121,8 @@ const createPlace =  async (req, res, next) => {
     res.status(201).json({place: createPlace})
 }
 
-const updatePlaceById = (req, res, next) => {
+
+const updatePlaceById = async (req, res, next) => {
     const erros =  validationResult(req);
     if(!erros.isEmpty()){
         console.log(erros);
@@ -116,14 +132,28 @@ const updatePlaceById = (req, res, next) => {
     const { title, description } = req.body;
     const placeId = req.params.pid;
 
-    const updatedPlace =  {...DUMMY_PLACES.find(p => p.id === placeId)};
-    const placeIndex = DUMMY_PLACES.findIndex(p => p.id === placeId);
-    updatedPlace.title = title;
-    updatedPlace.description = description;
+    let update;
+    try  {
+        update = await Place.findById(placeId);
 
-    DUMMY_PLACES[placeIndex] = updatedPlace;
+    } catch(err){
+        const error = new HttpError('업데이트 하는데 실패했습니다. 다시 시도해 주세요.', 500);
+        return next(error);
+    }
 
-    res.status(200).json({place: updatedPlace});
+
+    update.title = title;
+    update.description = description;
+
+    try {
+        await update.save();
+    } catch(err) {
+        const error = new HttpError('장소를 업데이트 할 수 었습니다.', 500);
+        return next(error);
+
+    }
+
+    res.status(200).json({update: update.toObject({getters: true})});
 
 }
 

@@ -157,12 +157,27 @@ const updatePlaceById = async (req, res, next) => {
 
 }
 
-const deletePlace = (req,res,next) => {
+const deletePlace = async (req,res,next) => {
     const placeId = req.params.pid;
-    if(DUMMY_PLACES.find(p => p.id === placeId)){
-        throw new HttpError('그 id에 해당하는 장소를 찾지 못했습니다.', 404)
+    
+    let place; // 전역 변수인 place선언 
+    // try {} 안에 const 상수로 선언을 하게 되면 다음 블럭에서 사용이 불가능 하기 때문에 
+    // 전역 변수로 place를 선언함.
+    try {
+     place = await Place.findById(placeId);
+    } catch (err) { 
+        const error = new HttpError('오류가 발생했습니다. 장소를 삭제할 수 없습니다.', 500);
+        return next(error);
     }
-    DUMMY_PLACES = DUMMY_PLACES.filter(p => p.id !== placeId);
+
+    try {
+      await place.deleteOne({_id : "placeId"});
+    } catch(err){
+        const error = new HttpError('오류가 발생했습니다. 장소를 삭제할 수 없습니다.', 500);
+        return next(error);
+    };
+
+
     res.status(200).json({message : '성공적으로 삭제되었습니다.'});
 }
 

@@ -16,9 +16,19 @@ const DUMMY_USERS = [
 
 ];
 
-const getUsers = (req,res, next) => {
-    res.json({ users: DUMMY_USERS });
-}
+
+const getUsers = async (req,res, next) => {
+    let users;
+    try{
+        //                           password는 뺀 나머지는 보여주기
+        users = await User.find({}, '-password');
+
+    } catch(err){
+        const error = new HttpError('나중에 다시 시도해주세요', 500);
+        return next(error);
+    }
+    res.json({users: users.map(user => user.toObject({ getters: true }))})
+};
 
 const signUp = async (req,res,next) => {
 
@@ -68,16 +78,28 @@ const signUp = async (req,res,next) => {
 
 
 
-const login = (req,res,next) => {
+const login = async (req,res,next) => {
     const { email, password } = req.body;
 
-const identifiedUser = DUMMY_USERS.find(u => u.email === email);
-    if(!identifiedUser || identifiedUser.password !== password) {
-        // Code 422 : 사용자 입력값이 유효하지 않을 때 사용되는 코드
-        throw new HttpError('사용자를 식별할 수 없으니 자격 증명을 확인하세요.', 422);
+    let existingUser;
+    try {
+        existingUser = await User.findOne({ email : email });
+    } catch(err) {
+        const error = new HttpError('로그인 실패했으니, 나중에 다시 시도해주세요.', 500);
+
+        return next(error);
     }
 
-    res.json({message : '로그인~'});
+    if(!existingUser || existingUser.password !== password ) {
+        const error = new HttpError('유효하지 않은 자격 증명으로 인해 로그인 할 수 없습니다.', 401);
+        return next(error)
+    }
+
+    
+
+
+
+    res.json({message : '로그인 성공'});
 };
 
 

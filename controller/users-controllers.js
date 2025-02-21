@@ -1,7 +1,10 @@
 const { v4: uuidv4 } = require('uuid');
 const { validationResult } = require('express-validator');
 
+
 const HttpError = require('../models/http-error');
+const User = require('../models/user');
+const { create } = require('../models/place');
 
 const DUMMY_USERS = [
     {
@@ -17,31 +20,50 @@ const getUsers = (req,res, next) => {
     res.json({ users: DUMMY_USERS });
 }
 
-const signUp = (req,res,next) => {
+const signUp = async (req,res,next) => {
 
     const error = validationResult(req);
 
     if(!error.isEmpty()){
-        throw new HttpError('유효하지 않은 입력 데이터를 전달했습니다. 데이터를 확인하세요.', 401)
+        return next(new HttpError('유효하지 않은 입력 데이터를 전달했습니다. 데이터를 확인하세요.', 401)
+    )}
+
+    const { name, email, password, places } = req.body;
+
+    //전역변수로 선언
+    let existingUser;
+    try {
+        existingUser = await User.findOne({ email : email });
+    } catch(err) {
+        const error = new HttpError('가입에 실패했으니, 나중에 다시 시도해주세요.', 500);
+
+        return next(error);
     }
 
-    const { name, email, password } = req.body;
-
-    const hasUser = DUMMY_USERS.find(u => u.email === email);
-    if(hasUser){
-        throw new HttpError('이 이메일은 이미 있습니다. 다른 이메일을 사용하세요.', 401);
+    if(existingUser){
+        const error = new HttpError('사용자가 이미 존재하니 로그인 해주세요.', 422);
+        // 오류 발생시 next(error)를 사용하여 코드 실행을 중지함.
+        return next(error);
     }
-
-    const createdUser = {
-        id: uuidv4(),
-        name, // name : name
+    
+    const createdUser = new User({
+        name,
         email,
-        password
-    };
+        image: 'https://www.fitpetmall.com/wp-content/uploads/2022/11/shutterstock_196467692-1024x819.jpg',
+        password,
+        places
+    });
 
-    DUMMY_USERS.push(createdUser);
+    try {
+        await createdUser.save();
+    } catch( err ){
+        const error = new HttpError(
+            '회원가입을 실패했습니다. 다시 시도하세요.', 500
+        );
+        return next(error);
+    }
 
-    res.status(201).json({user : createdUser })
+    res.status(201).json({user : createdUser.toObject({ getters: true })});
 }
 
 

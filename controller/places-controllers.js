@@ -126,8 +126,8 @@ const updatePlaceById = async (req, res, next) => {
     const erros =  validationResult(req);
     if(!erros.isEmpty()){
         console.log(erros);
-        throw new HttpError('유효하지 않은 입력 데이터를 전달했습니다. 데이터를 확인하세요.', 404);
-    }
+        return next(new HttpError('유효하지 않은 입력 데이터를 전달했습니다. 데이터를 확인하세요.', 404)
+    )}
 
     const { title, description } = req.body;
     const placeId = req.params.pid;

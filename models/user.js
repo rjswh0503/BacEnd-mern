@@ -11,7 +11,7 @@ const userSchema = new Schema({
     image: { type: String, required: true },
     // 한 유저가 여러 개의 장소를 추가할 수 있게게 배열로 [{ type : mongoose.Types.ObjectId, required : true, ref: 'Place'}]
     // 해야 함
-    places: [{ type : mongoose.Types.ObjectId, required : true, ref: 'Place'}]
+    places: [{ type: mongoose.Types.ObjectId, required: true, ref: 'Place' }]
 });
 
 

@@ -12,11 +12,11 @@ const app = express();
 
 app.use(bodyParser.json());
 
-app.use('/api/places',placesRoutes); // => /api/places/...
+app.use('/api/places', placesRoutes); // => /api/places/...
 app.use('/api/users', userRoutes);
 
-app.use((req,res,next) => {
-    const error = new HttpError('라우트를 찾지 못했습니다.',404);
+app.use((req, res, next) => {
+    const error = new HttpError('라우트를 찾지 못했습니다.', 404);
     throw error;
 });
 
@@ -27,19 +27,19 @@ app.use((req,res,next) => {
 
 */
 app.use((error, req, res, next) => {
-    if(res.headerSent){
+    if (res.headerSent) {
         return next(error);
     }
     res.status(error.code || 500);
-    res.json({Message: error.Message || '알 수 없는 애러가 발생했습니다.!!'});
+    res.json({ Message: error.Message || '알 수 없는 애러가 발생했습니다.!!' });
 });
 
 mongoose.connect('mongodb+srv://shin:153123@cluster0.ydxf4.mongodb.net/places?retryWrites=true&w=majority&appName=Cluster0')
-.then(() => {
-    app.listen(5000, (req,res) => {
-        console.log('서버 실행중....')
+    .then(() => {
+        app.listen(5000, (req, res) => {
+            console.log('서버 실행중....')
+        });
+    })
+    .catch((err) => {
+        console.log(err);
     });
-})
-.catch((err) => {
-    console.log(err);
-});

@@ -12,14 +12,14 @@ router.get('/', userController.getUsers);
 router.post('/signUp',
     [
         check('name')
-        .not()
-        .isEmpty(),
+            .not()
+            .isEmpty(),
         check('email')
-        .normalizeEmail() // test@test.com => test@test.com
-        .isEmail(),
-        check('password').isLength({min: 6 })
+            .normalizeEmail() // test@test.com => test@test.com
+            .isEmail(),
+        check('password').isLength({ min: 6 })
     ],
-     userController.signUp);
+    userController.signUp);
 
 
 

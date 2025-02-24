@@ -187,7 +187,12 @@ const deletePlace = async (req,res,next) => {
     // try {} 안에 const 상수로 선언을 하게 되면 다음 블럭에서 사용이 불가능 하기 때문에 
     // 전역 변수로 place를 선언함.
     try {
-     place = await Place.findById(placeId);
+        // populate()함수를 사용하면 다른 컬렉션에 저장된 문서를 참조하고 
+        // 그 컬렉션에 있는 다른 기존 문서의 데이터를 작업할 수 있음.
+        // populate()는 설정된 스키마 관계가 없으면 메서드 실행이 안됨.
+        // user 스키마에서 place스키마를 연결할 수 있는 ref()메서드를 사용하여 두 스키마를 연결하면면
+        //  populate()메서드를 사용할 수있다.
+     place = await Place.findById(placeId).populate();
     } catch (err) { 
         const error = new HttpError('오류가 발생했습니다. 장소를 삭제할 수 없습니다.', 500);
         return next(error);

@@ -63,20 +63,21 @@ const getPlacesById  = async (req,res,next) => {
 const getPlacesByUserId = async (req,res, next) => {
     const userId = req.params.uid;
 
-    let places;
+    //let places;
+    let userWithPlaces;
     try {
-        places = await Place.find({ creator : userId });
+        userWithPlaces = await User.findById(userId).populate('places');
     } catch(err) {
         const error = new HttpError('오류가 발생했습니다. 유저를 찾을 수 없습니다.', 500);
         return next(error);
     };
     
-    if(!places || places.length === 0 ){
+    if(!userWithPlaces || userWithPlaces.places.length === 0 ){
        return next(
        new HttpError('사용자 ID와 일치하는 장소를 찾을 수 없습니다.', 404)
     );
     };
-    res.json({ places : places.map(place => place.toObject( { getters: true } ) )})
+    res.json({ places : userWithPlaces.places.map(place => place.toObject( { getters: true } ) )})
 };
 
 
@@ -192,14 +193,24 @@ const deletePlace = async (req,res,next) => {
         // populate()는 설정된 스키마 관계가 없으면 메서드 실행이 안됨.
         // user 스키마에서 place스키마를 연결할 수 있는 ref()메서드를 사용하여 두 스키마를 연결하면면
         //  populate()메서드를 사용할 수있다.
-     place = await Place.findById(placeId).populate();
+     place = await Place.findById(placeId).populate('creator');
     } catch (err) { 
         const error = new HttpError('오류가 발생했습니다. 장소를 삭제할 수 없습니다.', 500);
         return next(error);
     }
 
+    if(!place){
+        const error = new HttpError('이 ID에 해당하는 장소가 없습니다.', 404);
+        return next(error);
+    }
+
     try {
-      await place.deleteOne({_id : "placeId"});
+    const sess = await mongoose.startSession();
+    sess.startTransaction();
+    await place.deleteOne({ session: sess });
+    place.creator.places.pull(place);
+    await place.creator.save({ session: sess });
+    await sess.commitTransaction();
     } catch(err){
         const error = new HttpError('오류가 발생했습니다. 장소를 삭제할 수 없습니다.', 500);
         return next(error);

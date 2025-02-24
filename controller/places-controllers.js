@@ -2,10 +2,12 @@
 // uuid 고유 식별자 id 
 const { v4: uuidv4 } = require('uuid');
 const { validationResult } = require('express-validator');
+const mongoose = require('mongoose');
 
 const HttpError = require('../models/http-error');
 const getCoordsForAddress = require('../util/location');
 const Place = require('../models/place');
+const User = require('../models/user');
 
 let DUMMY_PLACES = [
     {
@@ -104,12 +106,33 @@ const createPlace =  async (req, res, next) => {
         address,
         location: coordinates,
         image: 'https://i.namu.wiki/i/UdlHN4NBO9ma2-9zq4o1LOlNbzEcN14BprHeMxd1dZmp-C8j-7XKzrJiN0MEcl38bKlVDemPU7OjABFBNuCXlh4UTDnAZu_Qw8zWcx6TBc3zyXzr7V6rH4RXe_sR0TWYIJZqYa_L7BvrUq1EtMc2gOg--_6bllND_s5kcZ98fX8.webp',
-        creator
+        creator 
     });
+
+    let user;
+
+    try {
+        user = await User.findById(creator);
+    } catch(err){
+        const error = new HttpError('장소를 생성하는데 실패했습니다. 잠시후 다시 시도해주세요.',500);
+        return next(error);
+    }
+
+    if(!user){
+        const error = new HttpError('ID에 해당하는 사용자를 찾을 수 없습니다.', 404);
+        return next(error);
+    }
+
+    console.log(user);
 
     //save() 도 프로미스이다. 비동기식 작업 
     try {
-        await createPlace.save();
+    const sess  = await mongoose.startSession();
+    sess.startTransaction();
+    await createPlace.save( { session: sess })
+    user.places.push(createPlace);
+    await user.save({ session: sess });
+    await sess.commitTransaction();
     } catch( err ){
         const error = new HttpError(
             '장소 생성에 실패했습니다. 다시 시도하세요.', 500

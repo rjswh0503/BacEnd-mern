@@ -30,6 +30,7 @@ const getUsers = async (req,res, next) => {
     res.json({users: users.map(user => user.toObject({ getters: true }))})
 };
 
+
 const signUp = async (req,res,next) => {
 
     const error = validationResult(req);
@@ -38,7 +39,7 @@ const signUp = async (req,res,next) => {
         return next(new HttpError('유효하지 않은 입력 데이터를 전달했습니다. 데이터를 확인하세요.', 401)
     )}
 
-    const { name, email, password, places } = req.body;
+    const { name, email, password } = req.body;
 
     //전역변수로 선언
     let existingUser;
@@ -61,7 +62,7 @@ const signUp = async (req,res,next) => {
         email,
         image: 'https://www.fitpetmall.com/wp-content/uploads/2022/11/shutterstock_196467692-1024x819.jpg',
         password,
-        places
+        places: []
     });
 
     try {

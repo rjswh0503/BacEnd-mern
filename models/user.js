@@ -9,7 +9,9 @@ const userSchema = new Schema({
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true, minlength: 6 },
     image: { type: String, required: true },
-    places: {type: String, required: true },
+    // 한 유저가 여러 개의 장소를 추가할 수 있게게 배열로 [{ type : mongoose.Types.ObjectId, required : true, ref: 'Place'}]
+    // 해야 함
+    places: [{ type : mongoose.Types.ObjectId, required : true, ref: 'Place'}]
 });
 
 

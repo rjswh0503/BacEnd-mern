@@ -14,10 +14,21 @@ app.use(bodyParser.json());
 
 
 // 클라이언트와 서버간의 연결을 하기 위해 사용하는 함수
+// 모든 도메인에서 현재 서버로 요청을 보낼 수 있도록 허용함.
+// '*' 는 모든 도메인에 접근이 가능함 .
+//  
 app.use((req,res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
+    //
     res.setHeader('Access-COntrol-Allow-Headers', 'Origin, X-Request-With, Content-Type, Accept, Authorization');
+    // 클라이언트가 서버에 보낼 수 있는 HTTP 메서드를 정의한 것.
+    // 클라이언트에게 GET, POST, PATCH, DELETE를 허용함
+    
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE');
+
+    // 도메인에서 현재 서버로 HTTP 메서드인 GET, POST, PATCH, DELETE을 허용할 수 있게 설정해주는 것.
+
+    // 그리고 다음 미들웨어로 이동
     next();
 })
 

@@ -12,6 +12,15 @@ const app = express();
 
 app.use(bodyParser.json());
 
+
+// 클라이언트와 서버간의 연결을 하기 위해 사용하는 함수
+app.use((req,res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-COntrol-Allow-Headers', 'Origin, X-Request-With, Content-Type, Accept, Authorization');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE');
+    next();
+})
+
 app.use('/api/places', placesRoutes); // => /api/places/...
 app.use('/api/users', userRoutes);
 
@@ -34,7 +43,7 @@ app.use((error, req, res, next) => {
     res.json({ Message: error.Message || '알 수 없는 애러가 발생했습니다.!!' });
 });
 
-mongoose.connect('mongodb+srv://shin:153123@cluster0.ydxf4.mongodb.net/places?retryWrites=true&w=majority&appName=Cluster0')
+mongoose.connect('mongodb+srv://shin:153123@cluster0.ydxf4.mongodb.net/mern?retryWrites=true&w=majority&appName=Cluster0')
     .then(() => {
         app.listen(5000, (req, res) => {
             console.log('서버 실행중....')

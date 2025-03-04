@@ -2,6 +2,7 @@ const exrpess = require('express');
 const { check } = require('express-validator');
 
 const userController = require('../controller/users-controllers');
+const fileUpload = require('../middleware/file-upload');
 
 const router = exrpess.Router();
 
@@ -10,6 +11,7 @@ router.get('/', userController.getUsers);
 
 
 router.post('/signUp',
+    fileUpload.single('image'),
     [
         check('name')
             .not()

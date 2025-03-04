@@ -34,7 +34,7 @@ const signUp = async (req, res, next) => {
     try {
         existingUser = await User.findOne({ email: email });
     } catch (err) {
-        const error = new HttpError('가입에 실패했으니, 나중에 다시 시도해주세요.', 500);
+        const error = new HttpError('가입에 실패했습니다. 나중에 다시 시도해주세요.', 500);
 
         return next(error);
     }
@@ -88,7 +88,9 @@ const login = async (req, res, next) => {
 
 
 
-    res.json({ message: '로그인 성공' });
+    res.json({
+        message: '로그인 성공', user: existingUser.toObject({ getters: true })
+    });
 };
 
 

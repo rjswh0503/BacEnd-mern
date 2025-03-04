@@ -93,7 +93,7 @@ const createPlace = async (req, res, next) => {
         description,
         address,
         location: coordinates,
-        image: 'https://i.namu.wiki/i/UdlHN4NBO9ma2-9zq4o1LOlNbzEcN14BprHeMxd1dZmp-C8j-7XKzrJiN0MEcl38bKlVDemPU7OjABFBNuCXlh4UTDnAZu_Qw8zWcx6TBc3zyXzr7V6rH4RXe_sR0TWYIJZqYa_L7BvrUq1EtMc2gOg--_6bllND_s5kcZ98fX8.webp',
+        image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRifUhGfLaANW824fw3l4fyQhSBFm81j8jXwA&s',
         creator
     });
 

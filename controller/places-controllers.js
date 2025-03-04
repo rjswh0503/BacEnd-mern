@@ -1,3 +1,4 @@
+const fs = require('fs');
 
 // uuid 고유 식별자 id 
 const { v4: uuidv4 } = require('uuid');
@@ -93,7 +94,7 @@ const createPlace = async (req, res, next) => {
         description,
         address,
         location: coordinates,
-        image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRifUhGfLaANW824fw3l4fyQhSBFm81j8jXwA&s',
+        image: req.file.path,
         creator
     });
 
@@ -192,6 +193,8 @@ const deletePlace = async (req, res, next) => {
         return next(error);
     }
 
+    const imagePath = place.image;
+
     try {
         const sess = await mongoose.startSession();
         sess.startTransaction();
@@ -203,6 +206,10 @@ const deletePlace = async (req, res, next) => {
         const error = new HttpError('오류가 발생했습니다. 장소를 삭제할 수 없습니다.', 500);
         return next(error);
     };
+
+    fs.unlink(imagePath,err => {
+        console.log(err);
+    });
 
 
     res.status(200).json({ message: '성공적으로 삭제되었습니다.' });

@@ -3,7 +3,7 @@ const { check } = require('express-validator');
 
 
 const placeControllers = require('../controller/places-controllers');
-
+const placeImg = require('../middleware/imgUpload/placeImg');
 const router = exrpess.Router();
 
 
@@ -27,7 +27,8 @@ router.get('/user/:uid', placeControllers.getPlacesByUserId);
 
 // check()를 /api/places/을 대상으로 하는 post 요청에 추가 
 // title이 비어 있지(isEmpty)않도록(not) 확인(check())하는 미들웨어
-router.post('/', 
+router.post('/',
+    placeImg.single('image'),
     [
     check('title')
         .not()

@@ -21,12 +21,10 @@ const getUsers = async (req, res, next) => {
 const signUp = async (req, res, next) => {
 
     const error = validationResult(req);
-
     if (!error.isEmpty()) {
         return next(new HttpError('유효하지 않은 입력 데이터를 전달했습니다. 데이터를 확인하세요.', 401)
-        )
+        );
     }
-
     const { name, email, password } = req.body;
 
     //전역변수로 선언
@@ -40,7 +38,7 @@ const signUp = async (req, res, next) => {
     }
 
     if (existingUser) {
-        const error = new HttpError('사용자가 이미 존재하니 로그인 해주세요.', 422);
+        const error = new HttpError('사용자가 이미 존재합니다. 확인해주세요.', 422);
         // 오류 발생시 next(error)를 사용하여 코드 실행을 중지함.
         return next(error);
     }
@@ -48,7 +46,7 @@ const signUp = async (req, res, next) => {
     const createdUser = new User({
         name,
         email,
-        image: 'https://www.fitpetmall.com/wp-content/uploads/2022/11/shutterstock_196467692-1024x819.jpg',
+        image: req.file.path,
         password,
         places: []
     });

@@ -1,3 +1,6 @@
+const fs = require('fs');
+const path = require('path');
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -11,6 +14,11 @@ const HttpError = require('./models/http-error');
 const app = express();
 
 app.use(bodyParser.json());
+
+app.use('/uploads/Users', express.static(path.join('uploads', 'Users')));
+app.use('/uploads/Places', express.static(path.join('uploads', 'Places')));
+
+
 
 
 // 클라이언트와 서버간의 연결을 하기 위해 사용하는 함수
@@ -49,6 +57,11 @@ app.use((req, res, next) => {
 
 */
 app.use((error, req, res, next) => {
+    if (req.file) {
+        fs.unlink(req.file.path, (err) => {
+            console.log(err);
+        });
+    }
     if (res.headerSent) {
         return next(error);
     }

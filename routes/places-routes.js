@@ -23,6 +23,10 @@ id 값을 찾기 위해서는 params를 사용해야 함
 router.get('/user/:uid', placeControllers.getPlacesByUserId);
 
 
+
+router.get('/', placeControllers.getPlaces);
+
+
 // placeControllers에 있는 createPlace함수에 포인터
 
 // check()를 /api/places/을 대상으로 하는 post 요청에 추가 

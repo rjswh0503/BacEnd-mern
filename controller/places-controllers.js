@@ -11,6 +11,17 @@ const Place = require('../models/place');
 const User = require('../models/user');
 
 
+const getPlaces = async ( req, res, next ) => {
+    
+    try {
+        const places = await Place.find();
+        res.status(200).json({ success: true, data: places})
+    } catch(err){
+        const error = new HttpError('장소 데이터가 없습니다.', 500);
+        return next(error);
+    }
+}
+
 
 const getPlacesById = async (req, res, next) => {
     const placeId = req.params.pid // { pId : 'p1'}
@@ -216,6 +227,7 @@ const deletePlace = async (req, res, next) => {
 }
 
 
+exports.getPlaces = getPlaces;
 exports.getPlacesById = getPlacesById;
 exports.getPlacesByUserId = getPlacesByUserId;
 exports.createPlace = createPlace;

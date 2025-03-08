@@ -1,5 +1,6 @@
 const { validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const HttpError = require('../models/http-error');
 const User = require('../models/user');
@@ -19,6 +20,7 @@ const getUsers = async (req, res, next) => {
 };
 
 
+// jwt 토큰 추가하기
 const signUp = async (req, res, next) => {
 
     const error = validationResult(req);
@@ -45,19 +47,19 @@ const signUp = async (req, res, next) => {
     }
 
     let hashPassword;
-    try{
+    try {
         hashPassword = await bcrypt.hash(password, 12);
-    } catch(err){
+    } catch (err) {
         const error = new HttpError('계정 생성에 실패했습니다. 다시 시도해 주세요.', 500)
         return next(error);
     }
-    
+
 
     const createdUser = new User({
         name,
         email,
         image: req.file.path,
-        password : hashPassword,
+        password: hashPassword,
         places: []
     });
 
@@ -70,8 +72,17 @@ const signUp = async (req, res, next) => {
         return next(error);
     }
 
-    res.status(201).json({ user: createdUser.toObject({ getters: true }) });
-}
+    let token;
+    try {
+        token = jwt.sign({ userId: createdUser.id, email: createdUser.email },
+            'superssecret_dont-share', { expiresIn: '1h' }
+        );
+    } catch (err) {
+        const error = new HttpError('회원가입에 실패했습니다. 다시 시도해주세요.', 500);
+        return next(error);
+    }
+    res.status(201).json({ userId: createdUser.id, email: createdUser.email, token: token });
+};
 
 
 
@@ -95,22 +106,32 @@ const login = async (req, res, next) => {
     let isValidPassword = false;
     try {
         isValidPassword = await bcrypt.compare(password, existingUser.password);
-    } catch(err){
-        const error = new HttpError('비밀번호가 틀렸습니다. 다시 시도해주세요.',500);
+    } catch (err) {
+        const error = new HttpError('비밀번호가 틀렸습니다. 다시 시도해주세요.', 500);
         return next(error);
     }
-    
 
-    if(!isValidPassword) {
+
+    if (!isValidPassword) {
         const error = new HttpError('유효하지 않은 자격 증명으로 인해 로그인 할 수 없습니다.', 401);
         return next(error)
     }
 
 
-
+    let token;
+    try {
+        token = jwt.sign({ userId: existingUser.id, email: existingUser.email },
+            'superssecret_dont-share', { expiresIn: '1h' }
+        );
+    } catch (err) {
+        const error = new HttpError('로그인 실패했습니다. 다시 시도해주세요.', 500);
+        return next(error);
+    }
 
     res.json({
-        message: '로그인 성공', user: existingUser.toObject({ getters: true })
+        userId: existingUser.id,
+        email: existingUser.email,
+        token: token
     });
 };
 

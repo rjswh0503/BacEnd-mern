@@ -133,9 +133,10 @@ const login = async (req, res, next) => {
         email: existingUser.email,
         token: token
     });
-};
+    
+    console.log(`${existingUser.email}의 토큰: ` + token)
 
-
+}
 
 exports.getUsers = getUsers;
 exports.signUp = signUp;

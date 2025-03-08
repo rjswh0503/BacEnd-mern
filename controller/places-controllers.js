@@ -9,6 +9,7 @@ const HttpError = require('../models/http-error');
 const getCoordsForAddress = require('../util/location');
 const Place = require('../models/place');
 const User = require('../models/user');
+const place = require('../models/place');
 
 
 const getPlaces = async ( req, res, next ) => {
@@ -149,7 +150,7 @@ const updatePlaceById = async (req, res, next) => {
     const erros = validationResult(req);
     if (!erros.isEmpty()) {
         console.log(erros);
-        return next(new HttpError('유효하지 않은 입력 데이터를 전달했습니다. 데이터를 확인하세요.', 404)
+        return next(new HttpError('유효하지 않은 입력 데이터를 전달했습니다. 데이터를 확인하세요.', 422)
         )
     }
 
@@ -166,13 +167,18 @@ const updatePlaceById = async (req, res, next) => {
     }
 
 
+    if (update.creator.toString() !== req.userData.userId){
+        const error = new HttpError('업데이트 할 권한이 없습니다.', 401);
+        return next(error);
+    }
+
     update.title = title;
     update.description = description;
 
     try {
         await update.save();
     } catch (err) {
-        const error = new HttpError('장소를 업데이트 할 수 었습니다.', 500);
+        const error = new HttpError('업데이트 실패했습니다. 다시 시도해주세요. ', 500);
         return next(error);
 
     }
@@ -203,6 +209,13 @@ const deletePlace = async (req, res, next) => {
         const error = new HttpError('이 ID에 해당하는 장소가 없습니다.', 404);
         return next(error);
     }
+    // 401은 권한이 없다는 뜻인 코드
+    if(place.creator.id !== req.userData.userId){
+        const error = new HttpError('삭제할 권한이 없습니다.', 401);
+        return next(error);
+    }
+
+
 
     const imagePath = place.image;
 

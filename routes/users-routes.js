@@ -2,7 +2,7 @@ const exrpess = require('express');
 const { check } = require('express-validator');
 
 const userController = require('../controller/users-controllers');
-const userImg = require('../middleware/imgUpload/userImg');
+const userImg = require('../middleware/userImg');
 
 const router = exrpess.Router();
 

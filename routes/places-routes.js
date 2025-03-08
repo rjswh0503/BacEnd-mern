@@ -3,7 +3,8 @@ const { check } = require('express-validator');
 
 
 const placeControllers = require('../controller/places-controllers');
-const placeImg = require('../middleware/imgUpload/placeImg');
+const placeImg = require('../middleware/placeImg');
+const checkAuth = require('../middleware/check-auth');
 const router = exrpess.Router();
 
 
@@ -22,9 +23,7 @@ id 값을 찾기 위해서는 params를 사용해야 함
 
 router.get('/user/:uid', placeControllers.getPlacesByUserId);
 
-
-
-router.get('/', placeControllers.getPlaces);
+router.use(checkAuth);
 
 
 // placeControllers에 있는 createPlace함수에 포인터

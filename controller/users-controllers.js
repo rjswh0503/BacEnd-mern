@@ -1,4 +1,5 @@
 const { validationResult } = require('express-validator');
+const bcrypt = require('bcryptjs');
 
 const HttpError = require('../models/http-error');
 const User = require('../models/user');
@@ -43,11 +44,20 @@ const signUp = async (req, res, next) => {
         return next(error);
     }
 
+    let hashPassword;
+    try{
+        hashPassword = await bcrypt.hash(password, 12);
+    } catch(err){
+        const error = new HttpError('계정 생성에 실패했습니다. 다시 시도해 주세요.', 500)
+        return next(error);
+    }
+    
+
     const createdUser = new User({
         name,
         email,
         image: req.file.path,
-        password,
+        password : hashPassword,
         places: []
     });
 
@@ -77,11 +87,24 @@ const login = async (req, res, next) => {
         return next(error);
     }
 
-    if (!existingUser || existingUser.password !== password) {
+    if (!existingUser) {
         const error = new HttpError('유효하지 않은 자격 증명으로 인해 로그인 할 수 없습니다.', 401);
         return next(error)
     }
 
+    let isValidPassword = false;
+    try {
+        isValidPassword = await bcrypt.compare(password, existingUser.password);
+    } catch(err){
+        const error = new HttpError('비밀번호가 틀렸습니다. 다시 시도해주세요.',500);
+        return next(error);
+    }
+    
+
+    if(!isValidPassword) {
+        const error = new HttpError('유효하지 않은 자격 증명으로 인해 로그인 할 수 없습니다.', 401);
+        return next(error)
+    }
 
 
 

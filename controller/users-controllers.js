@@ -75,7 +75,7 @@ const signUp = async (req, res, next) => {
     let token;
     try {
         token = jwt.sign({ userId: createdUser.id, email: createdUser.email },
-            'superssecret_dont-share', { expiresIn: '1h' }
+            'superssecret_dont_share', { expiresIn: '1h' }
         );
     } catch (err) {
         const error = new HttpError('회원가입에 실패했습니다. 다시 시도해주세요.', 500);
@@ -121,7 +121,7 @@ const login = async (req, res, next) => {
     let token;
     try {
         token = jwt.sign({ userId: existingUser.id, email: existingUser.email },
-            'superssecret_dont-share', { expiresIn: '1h' }
+            'superssecret_dont_share', { expiresIn: '1h' }
         );
     } catch (err) {
         const error = new HttpError('로그인 실패했습니다. 다시 시도해주세요.', 500);

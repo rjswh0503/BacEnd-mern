@@ -120,8 +120,11 @@ const login = async (req, res, next) => {
 
     let token;
     try {
-        token = jwt.sign({ userId: existingUser.id, email: existingUser.email },
-            'superssecret_dont_share', { expiresIn: '1h' }
+        token = jwt.sign({
+            userId: existingUser.id, email: existingUser.email
+        },
+            'superssecret_dont_share',
+            { expiresIn: '1h' }
         );
     } catch (err) {
         const error = new HttpError('로그인 실패했습니다. 다시 시도해주세요.', 500);
@@ -133,7 +136,7 @@ const login = async (req, res, next) => {
         email: existingUser.email,
         token: token
     });
-    
+
     console.log(`${existingUser.email}의 토큰: ` + token)
 
 }

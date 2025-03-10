@@ -89,7 +89,7 @@ const createPlace = async (req, res, next) => {
         return next(new HttpError('유효하지 않은 입력 데이터를 전달했습니다. 데이터를 확인하세요.', 422));
     }
 
-    const { title, description, address, creator } = req.body;
+    const { title, description, address } = req.body;
 
     let coordinates;
     try {
@@ -107,7 +107,7 @@ const createPlace = async (req, res, next) => {
         address,
         location: coordinates,
         image: req.file.path,
-        creator
+        creator: req.userData.userId
     });
 
     let user;

@@ -113,7 +113,7 @@ const createPlace = async (req, res, next) => {
     let user;
 
     try {
-        user = await User.findById(creator);
+        user = await User.findById(req.userData.userId);
     } catch (err) {
         const error = new HttpError('장소를 생성하는데 실패했습니다. 잠시후 다시 시도해주세요.', 500);
         return next(error);
